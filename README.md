@@ -4,6 +4,6 @@ This repository hosts the official implementation of PRnet, a flexible and scala
 
 <p align="center"><img src="https://github.com/Perturbation-Response-Prediction/PRnet/blob/main/img/PRnet.svg" alt="PRnet" width="900px" /></p>
 
-The code and data will be availability after published.
+All code and data will be fully released with reasonable request. 
 
 
