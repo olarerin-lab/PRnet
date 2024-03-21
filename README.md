@@ -15,9 +15,9 @@ pip install -r requirements.txt
 
 | Name                                     | Description                                                  |
 | ---------------------------------------- | ------------------------------------------------------------ |
-| [drug_candidates_recomandation.ipynb](demo\drug_candidates_recomandation.ipynb) | Recomand drug for diseases.                                  |
-| [latent_tsne_lung_cancer](demo\latent_tsne_lung_cancer.ipynb)       | Learnable latent space of lung cancer data                   |
-| [SCLC_plot_dsea](demo\SCLC_plot_dsea.ipynb)                | Enrichment score of candidates against small cell lung cancer |
+| [drug_candidates_recomandation.ipynb](demo/drug_candidates_recomandation.ipynb) | Recomand drug for diseases.                                  |
+| [latent_tsne_lung_cancer](demo/latent_tsne_lung_cancer.ipynb)       | Learnable latent space of lung cancer data                   |
+| [SCLC_plot_dsea](demo/SCLC_plot_dsea.ipynb)                | Enrichment score of candidates against small cell lung cancer |
 
 
 
