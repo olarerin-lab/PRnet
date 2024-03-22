@@ -20,7 +20,8 @@ pip install -r requirements.txt
 | [SCLC_plot_dsea](demo/SCLC_plot_dsea.ipynb)                | Enrichment score of candidates against small cell lung cancer |
 
 
-
+## License
+This project is covered under the Apache 2.0 License.
 
 
 
