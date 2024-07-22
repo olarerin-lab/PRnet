@@ -11,13 +11,17 @@ To clone our model, install github and run:
 ```
 git clone https://github.com/Perturbation-Response-Prediction/PRnet.git
 ```
-Please download the datasets and store them in the dataset folder. Download the pretrained weights and store them in the checkpoint folder.
+Please download the datasets and store them in the `dataset` folder. Download the pretrained weights and store them in the `checkpoint` folder.
 
--chemCPA/: contains the code for the model, the data, and the training loop.
--embeddings: There is one folder for each molecular embedding model we benchmarked. Each contains an environment.yml with dependencies. We generated the embeddings using the provided notebooks and saved them to disk, to load them during the main training loop.
--experiments: Each folder contains a README.md with the experiment description, a .yaml file with the seml configuration, and a notebook to analyze the results.
--notebooks: Example analysis notebooks.
--preprocessing: Notebooks for processing the data. For each dataset there is one notebook that loads the raw data.
+- PRnet/: contains the code for the model, the data, and documents.
+- data: contains the `utils` for data  processing.
+- figure: Notebooks for generate figures in our paper.
+- img: contains the graphic abstract of PRnet.
+- models: 
+- There is one folder for each molecular embedding model we benchmarked. Each contains an environment.yml with dependencies. We generated the embeddings using the provided notebooks and saved them to disk, to load them during the main training loop.
+- experiments: Each folder contains a README.md with the experiment description, a .yaml file with the seml configuration, and a notebook to analyze the results.
+- notebooks: Example analysis notebooks.
+- preprocessing: Notebooks for processing the data. For each dataset there is one notebook that loads the raw data.
 tests: A few very basic tests.
 
 ## Step 1: Installation
