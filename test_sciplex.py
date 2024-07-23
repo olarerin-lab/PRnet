@@ -2,9 +2,9 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-03-21 21:46:27
+# @Last Modified time: 2024-07-23 17:00:34
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '6'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 import sys
@@ -32,30 +32,31 @@ if __name__ == "__main__":
     config_kwargs = {
         'batch_size' : 512,
         'comb_num' : 1,
-        'save_dir' : './checkpoint/',
+        'save_dir' : './checkpoint/sciplex_split/',
+        'results_dir' : './results/sciplex/',
         'n_epochs' : 100,
         'split_key' : args_train.split_key,
-        'x_dimension' : 978,
+        'x_dimension' : 5000,
         'hidden_layer_sizes' : [128],
         'z_dimension' : 64,
         'adaptor_layer_sizes' : [128],
         'comb_dimension' : 64, 
+        #'drug_dimension': 1031,
         'drug_dimension': 1024,
         'dr_rate' : 0.05,
-        'n_epochs' : 100,
         'lr' : 1e-3, 
         'weight_decay' : 1e-8,
         'scheduler_factor' : 0.5,
         'scheduler_patience' : 5,
-        'n_genes' : 20,
+        'n_genes' : 50,
         'loss' : ['GUSS'], 
-        'obs_key' : 'cov_drug_dose_name'
-    }  
+        'obs_key' : 'cov_drug'
+    }   
 
 
     print(os.getcwd())
 
-    adata = sc.read('./datasets/lincs_full_split_remove.h5ad')
+    adata = sc.read('./datasets/Sci_Plex.h5ad')
 
     
 
@@ -78,7 +79,7 @@ if __name__ == "__main__":
                             obs_key = config_kwargs['obs_key']
                                 )
 
-    Trainer.test('./checkpoint/lincs_split/drug_split_4_best_epoch_all.pt')
+    Trainer.test('./checkpoint/lincs_split/sciplex_best_epoch_all.pt')
 
 
     end_time = datetime.now()

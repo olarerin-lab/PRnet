@@ -22,7 +22,8 @@ class DrugDoseAnnDataset(Dataset):
     def __init__(self,
                  adata,
                  dtype='train',
-                 obs_key='cov_drug'
+                 obs_key='cov_drug',
+                 comb_num=1
                  ):
         self.dtype = dtype
         self.obs_key = obs_key        

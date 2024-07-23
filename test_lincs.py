@@ -2,9 +2,9 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-03-21 21:46:27
+# @Last Modified time: 2024-07-23 17:01:42
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '6'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 import sys
@@ -18,7 +18,7 @@ from trainer.PRnetTrainer import PRnetTrainer
 
 def parse_args():
     parse = argparse.ArgumentParser(description='perturbation-conditioned generative model ')  
-    parse.add_argument('--split_key', default='herb_split', type=str, help='split key of data')  
+    parse.add_argument('--split_key', default='lincs_split', type=str, help='split key of data')  
     args = parse.parse_args()  
     return args
 
@@ -33,6 +33,7 @@ if __name__ == "__main__":
         'batch_size' : 512,
         'comb_num' : 1,
         'save_dir' : './checkpoint/',
+        'results_dir' : './results/sciplex/',
         'n_epochs' : 100,
         'split_key' : args_train.split_key,
         'x_dimension' : 978,
@@ -55,7 +56,7 @@ if __name__ == "__main__":
 
     print(os.getcwd())
 
-    adata = sc.read('./datasets/lincs_full_split_remove.h5ad')
+    adata = sc.read('./datasets/Lincs_L1000.h5ad')
 
     
 
@@ -78,7 +79,7 @@ if __name__ == "__main__":
                             obs_key = config_kwargs['obs_key']
                                 )
 
-    Trainer.test('./checkpoint/lincs_split/drug_split_4_best_epoch_all.pt')
+    Trainer.test('./checkpoint/lincs_split/lincs_best_epoch_all.pt')
 
 
     end_time = datetime.now()

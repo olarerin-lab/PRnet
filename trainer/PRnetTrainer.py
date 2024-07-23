@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-23 02:24:40
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-03-21 21:47:20
+# @Last Modified time: 2024-07-23 16:20:30
 import os
 from sklearn import metrics
 
@@ -85,24 +85,26 @@ class PRnetTrainer:
         self.split_key = split_key
         self.z_dimension = z_dimension
         self.comb_dimension = comb_dimension
+
         self.model = PRnet(adata, x_dimension=self.x_dim, hidden_layer_sizes=hidden_layer_sizes, z_dimension=z_dimension, adaptor_layer_sizes=adaptor_layer_sizes, comb_dimension=comb_dimension, comb_num=comb_num, drug_dimension=drug_dimension,dr_rate=dr_rate)
+
         self.model_save_dir = model_save_dir
         self.loss = loss
-        self.modelVAE = self.model.get_VAE()
+        self.modelPGM = self.model.get_PGM()
 
 
-        self.seed = kwargs.get("seed", 2022)
+        self.seed = kwargs.get("seed", 2024)
         torch.manual_seed(self.seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed(self.seed)
             if(torch.cuda.device_count() > 1):
-                self.modelVAE = nn.DataParallel(self.modelVAE, device_ids=[i for i in range(torch.cuda.device_count())])         
+                self.modelPGM = nn.DataParallel(self.modelPGM, device_ids=[i for i in range(torch.cuda.device_count())])         
             
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.modelVAE = self.modelVAE.to(self.device)
+        self.modelPGM = self.modelPGM.to(self.device)
 
-        self.modelVAE.apply(self.weight_init)
-        print(self.modelVAE)
+        self.modelPGM.apply(self.weight_init)
+        print(self.modelPGM)
 
 
         self.adata = adata
@@ -113,13 +115,13 @@ class PRnetTrainer:
 
         
         if self.train_data is not None:
-            self.train_dataset = DrugDoseAnnDataset(self.train_data, dtype='train', obs_key=obs_key)     
+            self.train_dataset = DrugDoseAnnDataset(self.train_data, dtype='train', obs_key=obs_key, comb_num=comb_num)     
             self.train_dataloader = torch.utils.data.DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
         if self.valid_data is not None:
-            self.valid_dataset = DrugDoseAnnDataset(self.valid_data, dtype='valid', obs_key=obs_key)
+            self.valid_dataset = DrugDoseAnnDataset(self.valid_data, dtype='valid', obs_key=obs_key, comb_num=comb_num)
             self.valid_dataloader = torch.utils.data.DataLoader(self.valid_dataset, batch_size=batch_size, shuffle=True)
         if self.test_data is not None:
-            self.test_dataset = DrugDoseAnnDataset(self.test_data, dtype='test', obs_key=obs_key)
+            self.test_dataset = DrugDoseAnnDataset(self.test_data, dtype='test', obs_key=obs_key, comb_num=comb_num)
             self.test_dataloader = torch.utils.data.DataLoader(self.test_dataset, batch_size=batch_size, shuffle=True)
 
         if set(['NB']).issubset(loss):
@@ -135,10 +137,10 @@ class PRnetTrainer:
         # Optimization attributes
 
         self.epoch = -1  # epoch = self.epoch + 1 in compute metrics
-        self.best_state_dictVAE = None
+        self.best_state_dictPGM = None
 
 
-        self.VAE_losses = []
+        self.PGM_losses = []
         self.r2_score_mean = []
         self.r2_score_var = []
         self.mse_score = []
@@ -165,18 +167,18 @@ class PRnetTrainer:
     def train(self, n_epochs = 100, lr = 0.001, weight_decay= 1e-8, scheduler_factor=0.5,scheduler_patience=10,**extras_kwargs):
         self.n_epochs = n_epochs
         self.params = filter(lambda p: p.requires_grad, self.model.parameters())
-        paramsVAE = filter(lambda p: p.requires_grad, self.modelVAE.parameters())
+        paramsPGM = filter(lambda p: p.requires_grad, self.modelPGM.parameters())
 
-        self.optimVAE = torch.optim.Adam(
-            paramsVAE, lr=lr, weight_decay= weight_decay) # consider changing the param. like weight_decay, eps, etc.
-        #self.scheduler_autoencoder = torch.optim.lr_scheduler.StepLR(self.optimVAE, step_size=10)
-        self.scheduler_autoencoder = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimVAE, 'min',factor=scheduler_factor,verbose=1,min_lr=1e-8,patience=scheduler_patience)
+        self.optimPGM = torch.optim.Adam(
+            paramsPGM, lr=lr, weight_decay= weight_decay) # consider changing the param. like weight_decay, eps, etc.
+        #self.scheduler_autoencoder = torch.optim.lr_scheduler.StepLR(self.optimPGM, step_size=10)
+        self.scheduler_autoencoder = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimPGM, 'min',factor=scheduler_factor,verbose=1,min_lr=1e-8,patience=scheduler_patience)
 
 
         for self.epoch in range(self.n_epochs):
             loop = tqdm(enumerate(self.train_dataloader), total =len(self.train_dataloader))
             for i, data in loop:
-                self.modelVAE.zero_grad()
+                self.modelPGM.zero_grad()
                 (control, target) = data['features']
                 encode_label = data['label']
 
@@ -192,7 +194,7 @@ class PRnetTrainer:
 
                 noise = self.make_noise(b_size, 10)
                 
-                gene_reconstructions = self.modelVAE(control, encode_label, noise)
+                gene_reconstructions = self.modelPGM(control, encode_label, noise)
                 dim = gene_reconstructions.size(1) // 2
                 gene_means = gene_reconstructions[:, :dim]
                 gene_vars = gene_reconstructions[:, dim:]
@@ -247,14 +249,14 @@ class PRnetTrainer:
                     reconstruction_loss += kl_loss * 0.01
                 reconstruction_loss.backward()
 
-                # Update VAE
-                self.optimVAE.step()
+                # Update PGM
+                self.optimPGM.step()
                 
                 #self.scheduler_autoencoder.step()
 
                 # Output training stats               
                 # Save Losses for plotting later
-                self.VAE_losses.append(reconstruction_loss.item())
+                self.PGM_losses.append(reconstruction_loss.item())
 
 
                 loop.set_description(f'Epoch [{self.epoch}/{self.n_epochs}] [{i}/{len(self.train_dataloader)}]')
@@ -283,7 +285,7 @@ class PRnetTrainer:
                 b_size = control.size(0)
                 
                 noise = self.make_noise(b_size, 10)
-                gene_reconstructions = self.modelVAE(control, encode_label, noise).detach()
+                gene_reconstructions = self.modelPGM(control, encode_label, noise).detach()
                 dim = gene_reconstructions.size(1) // 2
                 gene_means = gene_reconstructions[:, :dim]
                 gene_vars = gene_reconstructions[:, dim:]
@@ -364,7 +366,7 @@ class PRnetTrainer:
                 self.patient = 0
                 print("Saving best state of network...")
                 print("Best State was in Epoch", self.epoch)
-                self.best_state_dictG = self.modelVAE.module.state_dict()
+                self.best_state_dictG = self.modelPGM.module.state_dict()
                 torch.save(self.best_state_dictG, self.model_save_dir+self.split_key+'_best_epoch_all.pt')
                 self.best_mse = self.mse_score[-1]
             elif self.patient <= 20:
@@ -374,7 +376,7 @@ class PRnetTrainer:
                 break
 
         
-        loss_dict = {'Loss_VAE': self.VAE_losses}
+        loss_dict = {'Loss_PGM': self.PGM_losses}
         metrics_dict = {'r2':self.r2_score_mean, 'mse':self.mse_score}
         loss_df = pd.DataFrame(loss_dict)
         metrics_df = pd.DataFrame(metrics_dict)
@@ -384,8 +386,8 @@ class PRnetTrainer:
 
     def test(self, model_path, return_dict = False):
 
-        self.modelVAE.load_state_dict(torch.load(model_path))
-        self.modelVAE.eval()
+        self.modelPGM.load_state_dict(torch.load(model_path))
+        self.modelPGM.eval()
 
         x_true_array = np.zeros((0, self.x_dim))
         y_true_array = np.zeros((0, self.x_dim))
@@ -413,7 +415,7 @@ class PRnetTrainer:
             b_size = control.size(0)
             
             noise = self.make_noise(b_size, 10)
-            gene_reconstructions = self.modelVAE(control, encode_label, noise).detach()
+            gene_reconstructions = self.modelPGM(control, encode_label, noise).detach()
             dim = gene_reconstructions.size(1) // 2
             gene_means = gene_reconstructions[:, :dim]
             gene_vars = gene_reconstructions[:, dim:]
@@ -466,8 +468,8 @@ class PRnetTrainer:
 
             x_true = control.cpu().numpy()
             x_true_array = np.concatenate((x_true_array, x_true),axis=0)
-
             
+           
 
             '''
                        
@@ -539,12 +541,15 @@ class PRnetTrainer:
         print('*****************r2_score_mean_de*********************:', r2_score_mean_de)
         print('*****************r2_score_var_de*********************:', r2_score_var_de)
         '''
-        #cov_drug_list_array = np.asarray(cov_drug_list, dtype=np.str_)
 
-        
+        # IF OOM, please save data with append mode:with open(self.model_save_dir+self.split_key+"XXX.csv", 'a+') as f:
         np.savetxt(self.model_save_dir+self.split_key+"y_true_array.csv", y_true_array, delimiter=",")
         np.savetxt(self.model_save_dir+self.split_key+"y_pre_array.csv", y_pre_array, delimiter=",")
         np.savetxt(self.model_save_dir+self.split_key+"x_true_array.csv", x_true_array, delimiter=",")
+
+        
+    
+
         with open(self.model_save_dir+self.split_key+"cov_drug_array.csv", 'w') as f:
             for i in cov_drug_list:
                 f.write(i+'\n')
@@ -574,8 +579,8 @@ class PRnetTrainer:
 
     def get_per_latent(self, model_path):
     
-        self.modelVAE.load_state_dict(torch.load(model_path))
-        self.modelVAE.eval()
+        self.modelPGM.load_state_dict(torch.load(model_path))
+        self.modelPGM.eval()
 
         cov_drug_list = []
         
@@ -608,8 +613,8 @@ class PRnetTrainer:
 
     def get_latent(self, model_path):
         
-        self.modelVAE.load_state_dict(torch.load(model_path))
-        self.modelVAE.eval()
+        self.modelPGM.load_state_dict(torch.load(model_path))
+        self.modelPGM.eval()
 
         cov_drug_list = []
         
@@ -647,14 +652,14 @@ class NBLoss(torch.nn.Module):
     def __init__(self):
         super(NBLoss, self).__init__()
 
-    def forward(self, mu, y, theta, eps=1e-8):
-        """Negative binomial negative log-likelihood. It assumes targets `y` with n
+    def forward(self, yhat, y, eps=1e-8):
+        """Negative binomial log-likelihood loss. It assumes targets `y` with n
         rows and d columns, but estimates `yhat` with n rows and 2d columns.
         The columns 0:d of `yhat` contain estimated means, the columns d:2*d of
         `yhat` contain estimated variances. This module assumes that the
         estimated mean and inverse dispersion are positive---for numerical
         stability, it is recommended that the minimum estimated variance is
-        greater than a small number (1e-3).
+        greater than a small number (1e-3). Reference: https://github.com/theislab/chemCPA/tree/main.
         Parameters
         ----------
         yhat: Tensor
@@ -664,16 +669,24 @@ class NBLoss(torch.nn.Module):
         eps: Float
                 numerical stability constant.
         """
+        dim = yhat.size(1) // 2
+        # means of the negative binomial (has to be positive support)
+        mu = yhat[:, :dim]
+        # inverse dispersion parameter (has to be positive support)
+        theta = yhat[:, dim:]
+
         if theta.ndimension() == 1:
             # In this case, we reshape theta for broadcasting
             theta = theta.view(1, theta.size(0))
-        log_theta_mu_eps = torch.log(theta + mu + eps)
-        res = (
-            theta * (torch.log(theta + eps) - log_theta_mu_eps)
-            + y * (torch.log(mu + eps) - log_theta_mu_eps)
-            + torch.lgamma(y + theta)
-            - torch.lgamma(theta)
-            - torch.lgamma(y + 1)
+        t1 = (
+            torch.lgamma(theta + eps)
+            + torch.lgamma(y + 1.0)
+            - torch.lgamma(y + theta + eps)
         )
-        res = _nan2inf(res)
-        return -torch.mean(res)
+        t2 = (theta + y) * torch.log(1.0 + (mu / (theta + eps))) + (
+            y * (torch.log(theta + eps) - torch.log(mu + eps))
+        )
+        final = t1 + t2
+        final = _nan2inf(final)
+
+        return torch.mean(final)

@@ -62,8 +62,8 @@ class PRnet(nn.Module):
         latent = latent.cpu().detach() # to cpu then detach from the comput.graph
         return np.array(latent)
 
-    def get_VAE(self):
-        return self.VAE
+    def get_PGM(self):
+        return self.PGM
 
 
 

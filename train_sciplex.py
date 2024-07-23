@@ -2,12 +2,11 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-03-21 21:46:35
+# @Last Modified time: 2024-07-23 15:34:59
 import os
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
-#os.environ['CUDA_VISIBLE_DEVICES'] = '2, 3'
-os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
-#os.environ['CUDA_VISIBLE_DEVICES'] = '6, 7'
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
 
 import sys
 print(sys.path)
@@ -38,7 +37,7 @@ if __name__ == "__main__":
     config_kwargs = {
         'batch_size' : 512,
         'comb_num' : 1,
-        'save_dir' : './checkpoint/sciplex_split/',
+        'save_dir' : './checkpoint/',
         'n_epochs' : 100,
         'split_key' : args_train.split_key,
         'x_dimension' : 5000,
@@ -63,7 +62,7 @@ if __name__ == "__main__":
 
 
     print(os.getcwd())
-    adata = sc.read('./datasets/sciplex3_split_5_deg_new.h5ad')
+    adata = sc.read('./datasets/Sci_Plex.h5ad')
 
     sc.pp.normalize_total(adata)
     sc.pp.log1p(adata)

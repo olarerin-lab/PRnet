@@ -2,12 +2,10 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-03-21 21:46:22
+# @Last Modified time: 2024-07-23 15:36:00
 import os
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
-#os.environ['CUDA_VISIBLE_DEVICES'] = '2, 3'
-#os.environ['CUDA_VISIBLE_DEVICES'] = '4, 5'
-os.environ['CUDA_VISIBLE_DEVICES'] = '6, 7'
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 import sys
 print(sys.path)
@@ -36,7 +34,7 @@ if __name__ == "__main__":
     config_kwargs = {
         'batch_size' : 512,
         'comb_num' : 1,
-        'save_dir' : './checkpoint/lincs_compair/',
+        'save_dir' : './checkpoint/',
         'n_epochs' : 500,
         'split_key' : args_train.split_key,
         'x_dimension' : 978,
@@ -62,7 +60,7 @@ if __name__ == "__main__":
 
     print(os.getcwd())
 
-    adata = sc.read('./datasets/lincs_full_split_remove_new.h5ad')
+    adata = sc.read('./datasets/Lincs_L1000.h5ad')
     sc.pp.normalize_total(adata)
     sc.pp.log1p(adata)
 
