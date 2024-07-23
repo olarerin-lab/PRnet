@@ -15,14 +15,12 @@ Please download the datasets and store them in the `dataset` folder. Download th
 
 - PRnet/: contains the code for the model, the data, and documents.
 - data: contains the `utils` for data  processing.
-- figure: Notebooks for generate figures in our paper.
+- figure: contains notebooks for generate figures in our paper.
 - img: contains the graphic abstract of PRnet.
-- models: 
-- There is one folder for each molecular embedding model we benchmarked. Each contains an environment.yml with dependencies. We generated the embeddings using the provided notebooks and saved them to disk, to load them during the main training loop.
-- experiments: Each folder contains a README.md with the experiment description, a .yaml file with the seml configuration, and a notebook to analyze the results.
-- notebooks: Example analysis notebooks.
-- preprocessing: Notebooks for processing the data. For each dataset there is one notebook that loads the raw data.
-tests: A few very basic tests.
+- models: contains models of PRnet.
+- trainer: contains trainer of PRnet.
+- preprocessing: contains notebooks for processing the data.
+- train and test: including test_lincs.py, train_lincs.py, train_sciplex.py and test_sciplex.py.
 
 ## Step 1: Installation
 We recommend using Anaconda or Dockerfile  to creat environment for using PRnet. Please make sure you have installed pre-installation.
