@@ -15,6 +15,7 @@ Please download the datasets and store them in the `dataset` folder. Download th
 
 - PRnet/: contains the code for the model, the data, and documents.
 - data: contains the `utils` for data  processing.
+- dataset: contains datasets.
 - figure: contains notebooks for generate figures in our paper.
 - img: contains the graphic abstract of PRnet.
 - models: contains models of PRnet.
