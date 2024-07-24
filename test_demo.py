@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-07-24 12:50:26
+# @Last Modified time: 2024-07-24 13:10:22
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
@@ -18,7 +18,10 @@ from trainer.PRnetTrainer import PRnetTrainer
 
 def parse_args():
     parse = argparse.ArgumentParser(description='perturbation-conditioned generative model ')  
-    parse.add_argument('--split_key', default='lincs_split', type=str, help='split key of data')  
+    parse.add_argument('--split_key', default='demo_split', type=str, help='split key of data') 
+    parse.add_argument('--data_path', default='./datasets/demo.h5ad', type=str, help='path of data')
+    parse.add_argument('--save_dir', default='./checkpoint/', type=str, help='path of model weight') 
+    parse.add_argument('--results_dir', default='./results/demo/', type=str, help='path of results')  
     args = parse.parse_args()  
     return args
 
@@ -27,16 +30,21 @@ def parse_args():
 if __name__ == "__main__":
     args_train = parse_args()
     start_time = datetime.now()
+
+    print(os.getcwd())
+
+    adata = sc.read(args_train.data_path)
+
     
 
     config_kwargs = {
         'batch_size' : 512,
         'comb_num' : 1,
-        'save_dir' : './checkpoint/',
-        'results_dir' : './results/lincs/',
+        'save_dir' : args_train.save_dir,
+        'results_dir' : args_train.results_dir,
         'n_epochs' : 100,
         'split_key' : args_train.split_key,
-        'x_dimension' : 978,
+        'x_dimension' : len(adata.var.index),
         'hidden_layer_sizes' : [128],
         'z_dimension' : 64,
         'adaptor_layer_sizes' : [128],
@@ -53,10 +61,6 @@ if __name__ == "__main__":
         'obs_key' : 'cov_drug_dose_name'
     }  
 
-
-    print(os.getcwd())
-
-    adata = sc.read('./datasets/Lincs_L1000.h5ad')
 
     
 

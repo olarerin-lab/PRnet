@@ -36,24 +36,60 @@ Then, you can activate the environment using:
 conda activate PRnet
 pip install -r requirements.txt
 ```
-#### setup the environment with Anaconda
+#### setup the environment with Docker
 Alternatively, you can use Docker to set up the environment. Build the Docker image using the provided Dockerfile:
 ```
-docker build -t Dockerfile .
+docker build -t prnet .
 ```
+You can change the Docker image of PyTorch according to your cuda version in Dockerfile 'FROM pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime'.
+
 Then run the Docker container:
 ```
-docker run -it --rm -v $(pwd):/workspace prnet
+docker run -dit --gpu all -v $(pwd):/workspace --name PRnet prnet
 ```
-## Step 2: Installation
+After the docker container is started, you can exit using 'exit'. If you use the -d mode, docker will be placed in the background. You can enter the container through `docker attach PRnet`. After stopping the container, start the container with `docker start PRnet`. You also can use `docker exec -it PRnet /bin/bash` to enter the container. 
 
-## Demos
+## Step 2: Test with demo datatset
+Inference with demo dataset:
+```
+python test_demo.py --split_key demo_split
+                    --data_path ./datasets/demo.h5ad
+                    --results_dir  ./results/demo/
+```
+## Step 3: Inference with custom datatset
+
+Please see [custom_data_preprocessing.ipynb](preprocessing/custom_data_preprocessing.ipynb) to prepare your dataset. 'custom_data_preprocessing' is a demo which preprocesses the data from CCLE.
+
+## Step 4: Train and test with provided datatset
+To train the L1000 dataset:
+```
+python train_lincs.py --split_key drug_split_4
+             
+```
+To test the L1000 dataset:
+```
+python test_lincs.py --split_key drug_split_4
+             
+```
+To train the Sci-plex dataset:
+```
+python train_sciplex.py --split_key drug_split_0
+             
+```
+To test the L1000 dataset:
+```
+python test_sciplex.py --split_key drug_split_0
+             
+```
+
+
+## Figures
 
 | Name                                     | Description                                                  |
 | ---------------------------------------- | ------------------------------------------------------------ |
-| [drug_candidates_recomandation.ipynb](demo/drug_candidates_recomandation.ipynb) | Recomand drug for diseases.                                  |
-| [latent_tsne_lung_cancer](demo/latent_tsne_lung_cancer.ipynb)       | Learnable latent space of lung cancer data                   |
-| [SCLC_plot_dsea](demo/SCLC_plot_dsea.ipynb)                | Enrichment score of candidates against small cell lung cancer |
+| [drug_candidates_recomandation.ipynb](figure/drug_candidates_recomandation.ipynb) | Recomand drug for diseases.                                  |
+| [latent_tsne_lung_cancer](figure/latent_tsne_lung_cancer.ipynb)       | Learnable latent space of lung cancer data                   |
+| [SCLC_plot_dsea](figure/SCLC_plot_dsea.ipynb)                | Enrichment score of candidates against small cell lung cancer |
 
 
 ## License
