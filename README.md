@@ -25,7 +25,7 @@ Please download the datasets and store them in the `dataset` folder. Download th
 
 ## Step 1: Installation
 We recommend using Anaconda or Dockerfile  to creat environment for using PRnet. Please make sure you have installed pre-installation.
-#### setup the environment with Anaconda
+#### Setup the environment with Anaconda
 We recommend using Anaconda to create a conda environment. You can create a python environment using the following command:
 
 ```
@@ -37,18 +37,18 @@ Then, you can activate the environment using:
 conda activate PRnet
 pip install -r requirements.txt
 ```
-#### setup the environment with Docker
+#### Setup the environment with Docker
 Alternatively, you can use Docker to set up the environment. Build the Docker image using the provided Dockerfile:
 ```
 docker build -t prnet .
 ```
-You can change the Docker image of PyTorch according to your cuda version in Dockerfile 'FROM pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime'.
+You can change the Docker image of PyTorch according to your cuda version in Dockerfile `FROM pytorch/pytorch:1.12.1-cuda11.3-cudnn8-runtime`.
 
 Then run the Docker container:
 ```
 docker run -dit --gpu all -v $(pwd):/workspace --name PRnet prnet
 ```
-After the docker container is started, you can exit using 'exit'. If you use the -d mode, docker will be placed in the background. You can enter the container through `docker attach PRnet`. After stopping the container, start the container with `docker start PRnet`. You also can use `docker exec -it PRnet /bin/bash` to enter the container. 
+After the docker container is started, you can exit using `exit`. If you use the -d mode, docker will be placed in the background. You can enter the container through `docker attach PRnet`. After stopping the container, start the container with `docker start PRnet`. You also can use `docker exec -it PRnet /bin/bash` to enter the container. 
 
 ## Step 2: Test with demo datatset
 Inference with demo dataset:
