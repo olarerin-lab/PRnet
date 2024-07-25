@@ -5,7 +5,7 @@ This repository hosts the official implementation of PRnet, a flexible and scala
 <p align="center"><img src="https://github.com/Perturbation-Response-Prediction/PRnet/blob/main/img/PRnet.svg" alt="PRnet" width="900px" /></p>
 
 ## Download model and datasets
-We provide [model pretrained weight](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/PRnet_model.h5ad) and precessed dataset ([LINCS_L1000](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Lincs_L1000.h5ad) and [Sci-Plex](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Sci_Plex.h5ad)) for training and reproducibility.
+We provide [model pretrained weight](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/PRnet_model.zip) and precessed dataset ([LINCS_L1000](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Lincs_L1000.h5ad) and [Sci-Plex](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Sci_Plex.h5ad)) for training and reproducibility.
 
 To clone our model, install github and run:
 ```
