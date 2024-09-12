@@ -92,6 +92,12 @@ python test_sciplex.py --split_key drug_split_0
 | [latent_tsne_lung_cancer](figure/latent_tsne_lung_cancer.ipynb)       | Learnable latent space of lung cancer data                   |
 | [SCLC_plot_dsea](figure/SCLC_plot_dsea.ipynb)                | Enrichment score of candidates against small cell lung cancer |
 
+## References
+
+paper: Xiaoning Qi, Lianhe Zhao, Chenyu Tian, Yueyue Li, Zhen-Lin Chen, Peipei Huo, Runsheng Chen, Xiaodong Liu, Baoping Wan, Shengyong Yang and Yi Zhao. Predicting transcriptional responses to novel chemical perturbations using deep generative model[J]. Nature Communications, 2024.
+
+
+code: [![DOI](https://zenodo.org/badge/746721413.svg)](https://zenodo.org/doi/10.5281/zenodo.13751383)
 
 ## License
 This project is covered under the Apache 2.0 License.
