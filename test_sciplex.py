@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-07-23 17:00:34
+# @Last Modified time: 2024-10-23 11:27:35
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
                             obs_key = config_kwargs['obs_key']
                                 )
 
-    Trainer.test('./checkpoint/lincs_split/sciplex_best_epoch_all.pt')
+    Trainer.test('./checkpoint/sciplex_best_epoch_all.pt')
 
 
     end_time = datetime.now()
