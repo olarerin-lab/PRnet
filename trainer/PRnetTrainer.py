@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-23 02:24:40
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-10-31 09:41:46
+# @Last Modified time: 2024-10-31 14:50:35
 import os
 from sklearn import metrics
 
@@ -645,7 +645,67 @@ class PRnetTrainer:
 
         return latent_array, cov_drug_list
 
+    @staticmethod
+    def pearson_mean(data1, data2):
+        sum_pearson_1 = 0
+        sum_pearson_2 = 0
+        for i in range(data1.shape[0]):
+            pearsonr_ = pearsonr(data1[i], data2[i])
+            sum_pearson_1 += pearsonr_[0]
+            sum_pearson_2 += pearsonr_[1]
+        return sum_pearson_1/data1.shape[0], sum_pearson_2/data1.shape[0]
+    
+    @staticmethod
+    def r2_mean(data1, data2):
+        sum_r2_1 = 0
+        for i in range(data1.shape[0]):
+            r2_score_ = r2_score(data1[i], data2[i])
+            sum_r2_1 += r2_score_           
+        return sum_r2_1/data1.shape[0]
 
+    @staticmethod
+    def _convert_mean_disp_to_counts_logits(mu, theta, eps=1e-6):
+        r"""NB parameterizations conversion. Reference: https://github.com/theislab/chemCPA/tree/main.
+    Parameters
+    ----------
+    mu :
+        mean of the NB distribution.
+    theta :
+        inverse overdispersion.
+    eps :
+        constant used for numerical log stability. (Default value = 1e-6)
+    Returns
+    -------
+    type
+        the number of failures until the experiment is stopped
+        and the success probability.
+    """
+        assert (mu is None) == (theta is None), "If using the mu/theta NB parameterization, both parameters must be specified"
+        logits = (mu + eps).log() - (theta + eps).log()
+        total_count = theta
+        return total_count, logits
+    
+    @staticmethod
+    def _sample_z(mu: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
+        """
+            Samples from standard Normal distribution with shape [size, z_dim] and
+            applies re-parametrization trick. It is actually sampling from latent
+            space distributions with N(mu, var) computed by the Encoder.
+
+        Parameters
+            ----------
+        mean:
+        Mean of the latent Gaussian
+            log_var:
+        Standard deviation of the latent Gaussian
+            Returns
+            -------
+        Returns Torch Tensor containing latent space encoding of 'x'.
+        The computed Tensor of samples with shape [size, z_dim].
+        """
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return mu + std * eps
 
 
 class NBLoss(torch.nn.Module):
@@ -698,64 +758,3 @@ class NBLoss(torch.nn.Module):
         eps = torch.random.randn(std)
         return mu + std * eps
 
-    @staticmethod
-    def pearson_mean(data1, data2):
-        sum_pearson_1 = 0
-        sum_pearson_2 = 0
-        for i in range(data1.shape[0]):
-            pearsonr_ = pearsonr(data1[i], data2[i])
-            sum_pearson_1 += pearsonr_[0]
-            sum_pearson_2 += pearsonr_[1]
-        return sum_pearson_1/data1.shape[0], sum_pearson_2/data1.shape[0]
-    
-    @staticmethod
-    def r2_mean(data1, data2):
-        sum_r2_1 = 0
-        for i in range(data1.shape[0]):
-            r2_score_ = r2_score(data1[i], data2[i])
-            sum_r2_1 += r2_score_           
-        return sum_r2_1/data1.shape[0]
-
-    @staticmethod
-    def _convert_mean_disp_to_counts_logits(mu, theta, eps=1e-6):
-        r"""NB parameterizations conversion
-    Parameters
-    ----------
-    mu :
-        mean of the NB distribution.
-    theta :
-        inverse overdispersion.
-    eps :
-        constant used for numerical log stability. (Default value = 1e-6)
-    Returns
-    -------
-    type
-        the number of failures until the experiment is stopped
-        and the success probability.
-    """
-        assert (mu is None) == (theta is None), "If using the mu/theta NB parameterization, both parameters must be specified"
-        logits = (mu + eps).log() - (theta + eps).log()
-        total_count = theta
-        return total_count, logits
-    
-    @staticmethod
-    def _sample_z(mu: torch.Tensor, log_var: torch.Tensor) -> torch.Tensor:
-        """
-            Samples from standard Normal distribution with shape [size, z_dim] and
-            applies re-parametrization trick. It is actually sampling from latent
-            space distributions with N(mu, var) computed by the Encoder.
-
-        Parameters
-            ----------
-        mean:
-        Mean of the latent Gaussian
-            log_var:
-        Standard deviation of the latent Gaussian
-            Returns
-            -------
-        Returns Torch Tensor containing latent space encoding of 'x'.
-        The computed Tensor of samples with shape [size, z_dim].
-        """
-        std = torch.exp(0.5 * log_var)
-        eps = torch.randn_like(std)
-        return mu + std * eps
