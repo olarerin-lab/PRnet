@@ -89,6 +89,17 @@ To test the L1000 dataset:
 python test_sciplex.py --split_key drug_split_0       
 ```
 
+## Step 4: Analysis the results
+To analysis the L1000 dataset:
+```
+python analysis_lincs.py --split_key drug_split_4
+             
+```
+To analysis the Sci-plex dataset:
+```
+python analysis_sciplex.py --split_key drug_split_0
+             
+```
 
 ## Figures
 
