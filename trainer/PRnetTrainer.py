@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-23 02:24:40
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-10-31 14:50:35
+# @Last Modified time: 2024-10-31 15:26:11
 import os
 from sklearn import metrics
 
@@ -77,7 +77,7 @@ class PRnetTrainer:
     obs_key:
         observation key of data
     """
-    def __init__(self, adata, batch_size = 32, comb_num = 2, shuffle = True, split_key='random_split', model_save_dir = './checkpoint/', x_dimension = 5000, hidden_layer_sizes = [128], z_dimension = 64, adaptor_layer_sizes = [128], comb_dimension = 64, drug_dimension = 1031, n_genes=20,  dr_rate = 0.05, loss = ['guss'], obs_key = 'cov_drug_name', **kwargs): # maybe add more parameters
+    def __init__(self, adata, batch_size = 32, comb_num = 2, shuffle = True, split_key='random_split', model_save_dir = './checkpoint/',results_save_dir = './results/', x_dimension = 5000, hidden_layer_sizes = [128], z_dimension = 64, adaptor_layer_sizes = [128], comb_dimension = 64, drug_dimension = 1031, n_genes=20,  dr_rate = 0.05, loss = ['GUSS'], obs_key = 'cov_drug_name', **kwargs): # maybe add more parameters
         
         assert set(loss).issubset(['NB', 'GUSS', 'KL', 'MSE']), "loss should be subset of ['NB', 'GUSS', 'KL', 'MSE']"
 
@@ -89,6 +89,7 @@ class PRnetTrainer:
         self.model = PRnet(adata, x_dimension=self.x_dim, hidden_layer_sizes=hidden_layer_sizes, z_dimension=z_dimension, adaptor_layer_sizes=adaptor_layer_sizes, comb_dimension=comb_dimension, comb_num=comb_num, drug_dimension=drug_dimension,dr_rate=dr_rate)
 
         self.model_save_dir = model_save_dir
+        self.results_save_dir = results_save_dir
         self.loss = loss
         self.modelPGM = self.model.get_PGM()
 
@@ -150,18 +151,6 @@ class PRnetTrainer:
         self.best_mse = np.inf
         self.patient = 0
 
-
-    @staticmethod
-    def _anndataToTensor(adata: AnnData) -> torch.Tensor:
-        data_ndarray = adata.X.A
-        data_tensor = torch.from_numpy(data_ndarray)
-        return data_tensor
-    
-    def make_noise(self, batch_size, shape, volatile=False):
-        tensor = torch.randn(batch_size, shape)
-        noise = Variable(tensor, volatile)
-        noise = noise.to(self.device, dtype=torch.float32)
-        return noise
 
 
     def train(self, n_epochs = 100, lr = 0.001, weight_decay= 1e-8, scheduler_factor=0.5,scheduler_patience=10,**extras_kwargs):
@@ -406,6 +395,10 @@ class PRnetTrainer:
             data_cov_drug = vdata['cov_drug']
             cov_drug_list = cov_drug_list + data_cov_drug
 
+            with open(self.results_save_dir+self.split_key+"_cov_drug_array.csv", 'a') as f:
+                for i in data_cov_drug:
+                    f.write(i+'\n')
+
             control = control.to(self.device, dtype=torch.float32)
             if set(['NB']).issubset(self.loss):
                     control = torch.log1p(control)
@@ -456,110 +449,39 @@ class PRnetTrainer:
 
                 
             nb_sample = dist.sample().cpu().numpy()
-            yp_m = nb_sample.mean(axis=0)
-            yp_v = nb_sample.var(axis=0)
 
-            y_true = target.cpu().numpy()
-            yt_m = y_true.mean(axis=0)
-            yt_v = y_true.var(axis=0)
-
-            y_true_array = np.concatenate((y_true_array, y_true),axis=0)
             y_pre_array = np.concatenate((y_pre_array, nb_sample),axis=0)
 
             x_true = control.cpu().numpy()
             x_true_array = np.concatenate((x_true_array, x_true),axis=0)
+
             
-           
+            with open(self.results_save_dir+self.split_key+"_y_pre_array.csv", 'a+') as f:
+                np.savetxt(f, nb_sample, delimiter=",")
 
-            '''
-                       
-            y_true_de_array = np.zeros((len(y_true), self.de_n_genes))
-            y_pre_de_array = np.zeros((len(y_true), self.de_n_genes))
-
-            for idx in range(len(y_true)):
-                de_idx = np.where(self.adata_var_names.isin(np.array(self.adata_deg_list[data_cov_drug[idx]])))[0]
-                y_true_de = y_true[idx, :]
-                y_pre_de = nb_sample[idx, :]
-                y_true_de_array[idx] = y_true_de[de_idx]
-                y_pre_de_array[idx] = y_pre_de[de_idx]
-            
-            y_true_de_array_ = np.concatenate((y_true_de_array_, y_true_de_array),axis=0)
-            y_pre_de_array_ =  np.concatenate((y_pre_de_array_, y_pre_de_array),axis=0)
-            '''
-            
+            with open(self.results_save_dir+self.split_key+"_x_true_array.csv", 'a+') as f:
+                np.savetxt(f, x_true, delimiter=",")
         
-        '''
-        yt_m_de = y_true_de_array_.mean(axis=0)
-        yt_v_de = y_true_de_array_.var(axis=0)
-
-        yp_m_de = y_pre_de_array_.mean(0)
-        yp_v_de = y_pre_de_array_.var(0)
-
-        r2_score_mean_de = r2_score(yt_m_de, yp_m_de)
-        r2_score_var_de = r2_score(yt_v_de, yp_v_de)
-        
-        mse_score_de =  mean_squared_error(y_true_de_array_, y_pre_de_array_)
-        r2_score_de = r2_score(y_true_de_array_, y_pre_de_array_)
-        pearson_score_de = self.pearson_mean(y_true_de_array_, y_pre_de_array_)
-
-        '''
-        
-
-
-
-        mse_score =  mean_squared_error(y_true_array, y_pre_array)
-        r2_score_ = self.r2_mean(y_true_array, y_pre_array)
-        r2_score_m = r2_score(y_true_array.mean(0), y_pre_array.mean(0))
-        pearson_score_ = self.pearson_mean(y_true_array, y_pre_array)
-        yt_m = y_true_array.mean(0)
-        yt_v = y_true_array.var(0)
-        yp_m = y_pre_array.mean(0)
-        yp_v = y_pre_array.var(0)
-        r2_score_mean = r2_score(yt_m, yp_m)
-        r2_score_var = r2_score(yt_v, yp_v)
-
-
-
-
-        print('*****************pearson_score*********************:', pearson_score_)
-
-        print('*****************mse score*********************:', mse_score)
-        print('*****************r2 score*********************:', r2_score_)
-        print('*****************r2 score_mean*********************:', r2_score_m)
-        print('*****************r2 score mean*********************:', r2_score_mean)
-        print('*****************r2 score var*********************:', r2_score_var)
-
-
-        '''
-        
-        
-        print('*****************pearson_score_ score_de*********************:', pearson_score_de)
-
-        print('*****************mse score_de*********************:', mse_score_de)
-        print('*****************r2 score_de*********************:', r2_score_de)
-
-        print('*****************r2_score_mean_de*********************:', r2_score_mean_de)
-        print('*****************r2_score_var_de*********************:', r2_score_var_de)
-        '''
-
-        # IF OOM, please save data with append mode:with open(self.model_save_dir+self.split_key+"XXX.csv", 'a+') as f:
-        np.savetxt(self.model_save_dir+self.split_key+"y_true_array.csv", y_true_array, delimiter=",")
-        np.savetxt(self.model_save_dir+self.split_key+"y_pre_array.csv", y_pre_array, delimiter=",")
-        np.savetxt(self.model_save_dir+self.split_key+"x_true_array.csv", x_true_array, delimiter=",")
-
-        
-    
-
-        with open(self.model_save_dir+self.split_key+"cov_drug_array.csv", 'w') as f:
-            for i in cov_drug_list:
-                f.write(i+'\n')
+        print("Attention! The data were saved with append mode!If you want to change to overwrite mode, you can change the save mode to 'w'")
+        print("The Gound Truth has been saved to:", self.results_save_dir+self.split_key+"_x_true_array.csv", 'with append mode!')
+        print("The Prediction has been saved to:", self.results_save_dir+self.split_key+"_y_pre_array.csv", 'with append mode!')
+        print("The Split Key has been saved to:", self.results_save_dir+self.split_key+"_cov_drug_array.csv", 'with append mode!')
 
         if return_dict == True:
-      
               
             return x_true_array,y_true_array,y_pre_array,cov_drug_list
  
-
+    @staticmethod
+    def _anndataToTensor(adata: AnnData) -> torch.Tensor:
+        data_ndarray = adata.X.A
+        data_tensor = torch.from_numpy(data_ndarray)
+        return data_tensor
+    
+    def make_noise(self, batch_size, shape, volatile=False):
+        tensor = torch.randn(batch_size, shape)
+        noise = Variable(tensor, volatile)
+        noise = noise.to(self.device, dtype=torch.float32)
+        return noise
 
     def weight_init(self, m):  
         # initialize the weights of the model

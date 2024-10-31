@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-07-23 15:36:00
+# @Last Modified time: 2024-10-31 16:48:51
 import os
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -13,8 +13,6 @@ print(sys.path)
 import argparse 
 from datetime import datetime
 import scanpy as sc
-from data._utils import rank_genes_groups_by_cov, get_union_gene
-#from trainer.drug_comb_trainer import scDrugCombAdaptTrainer
 from trainer.PRnetTrainer import PRnetTrainer
 
 def parse_args():
@@ -60,7 +58,7 @@ if __name__ == "__main__":
 
     print(os.getcwd())
 
-    adata = sc.read('./datasets/Lincs_L1000.h5ad')
+    adata = sc.read('./dataset/Lincs_L1000.h5ad')
     sc.pp.normalize_total(adata)
     sc.pp.log1p(adata)
 

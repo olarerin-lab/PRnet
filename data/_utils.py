@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-09 09:05:55
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-07-24 13:57:46
+# @Last Modified time: 2024-10-31 16:33:14
 import scanpy as sc
 import numpy as np
 import pandas as pd
@@ -236,18 +236,17 @@ def condition_fc_groups_by_cov(
         adata_cov_df['condition'] = data[groupby]
 
 
-        control_mean = adata_cov_df[adata_cov_df.cov_drug_name == control_group_cov].mean(numeric_only=True)+1e-6
+        control_mean = adata_cov_df[adata_cov_df.cov_drug_name == control_group_cov].mean(numeric_only=True)
         control_exp_mean[control_group_cov] = control_mean
 
         for cond, df in tqdm(adata_cov_df.groupby('condition')): 
             if df.shape[0] != 0 :
                 if cond != control_group_cov:
-                    drug_mean = df.mean(numeric_only=True)+1e-6
-                    fold_change[cond] = drug_mean/control_mean
+                    drug_mean = df.mean(numeric_only=True)
+                    fold_change[cond] = drug_mean-control_mean
                     condition_exp_mean[cond] = drug_mean
 
     return condition_exp_mean, control_exp_mean, fold_change
-
 
 
     

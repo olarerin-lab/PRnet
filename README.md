@@ -7,7 +7,7 @@ This repository hosts the official implementation of PRnet, a flexible and scala
 ## Download model and datasets
 We provide [model pretrained weight](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/PRnet_model.zip) and precessed dataset ([LINCS_L1000](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Lincs_L1000.h5ad) and [Sci-Plex](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Sci_Plex.h5ad)) for training and reproducibility.
 
-If the links above fail to redirect, please download the corresponding data and pretrained model weights from: [http://prnet.drai.cn/Statistics/](http://prnet.drai.cn/Statistics/). For the data files, download `LINCS L1000 Chemical Perturbations` and `Sci-plex Chemical Perturbations` from the `Supplementary Dataset` section. For the model weights, download the `PRnet model` from the `Supplementary Dataset` section.
+If the links above fail to redirect, please download the corresponding data and pretrained model weights from: [http://prnet.drai.cn/Statistics/](http://prnet.drai.cn/Statistics/). For the data files, download `LINCS L1000 Chemical Perturbations` and `Sci-plex Chemical Perturbations` from the `Supplementary Dataset` section. For the model weights, download the `PRnet model` from the `Supplementary Dataset` section. Then change the names of the datasets to `Lincs_L1000.h5ad` and `Sci_Plex.h5ad` respectively. If the dataset cannot be downloaded, please adjust your browser settings to allow insecure content on the current webpage by setting it to "Allow."
 
 To clone our model, install github and run:
 ```
@@ -53,6 +53,14 @@ docker run -dit --gpu all -v $(pwd):/workspace --name PRnet prnet
 After the docker container is started, you can exit using `exit`. If you use the -d mode, docker will be placed in the background. You can enter the container through `docker attach PRnet`. After stopping the container, start the container with `docker start PRnet`. You also can use `docker exec -it PRnet /bin/bash` to enter the container. 
 
 ## Step 2: Test with demo datatset
+Create result folders:
+```
+mkdir results
+mkdir /results/lincs
+mkdir /results/sciplex
+mkdir /results/demo
+```
+
 Inference with demo dataset:
 ```
 python test_demo.py --split_key demo_split
@@ -66,23 +74,19 @@ Please see [custom_data_preprocessing.ipynb](preprocessing/custom_data_preproces
 ## Step 4: Train and test with provided datatset
 To train the L1000 dataset:
 ```
-python train_lincs.py --split_key drug_split_4
-             
+python train_lincs.py --split_key drug_split_4    
 ```
 To test the L1000 dataset:
 ```
-python test_lincs.py --split_key drug_split_4
-             
+python test_lincs.py --split_key drug_split_4     
 ```
 To train the Sci-plex dataset:
 ```
-python train_sciplex.py --split_key drug_split_0
-             
+python train_sciplex.py --split_key drug_split_0         
 ```
 To test the L1000 dataset:
 ```
-python test_sciplex.py --split_key drug_split_0
-             
+python test_sciplex.py --split_key drug_split_0       
 ```
 
 

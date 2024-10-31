@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-10-23 11:26:59
+# @Last Modified time: 2024-10-31 15:26:58
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
@@ -71,6 +71,7 @@ if __name__ == "__main__":
                             comb_num=config_kwargs['comb_num'],
                             split_key=config_kwargs['split_key'],
                             model_save_dir=config_kwargs['save_dir'],
+                            results_save_dir=config_kwargs['results_dir'],
                             x_dimension=config_kwargs['x_dimension'],
                             hidden_layer_sizes=config_kwargs['hidden_layer_sizes'],
                             z_dimension=config_kwargs['z_dimension'],

@@ -2,7 +2,7 @@
 # @Author: Xiaoning Qi
 # @Date:   2022-06-13 09:47:44
 # @Last Modified by:   Xiaoning Qi
-# @Last Modified time: 2024-07-23 15:34:59
+# @Last Modified time: 2024-10-31 15:47:43
 import os
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
 
     print(os.getcwd())
-    adata = sc.read('./datasets/Sci_Plex.h5ad')
+    adata = sc.read('./dataset/Sci_Plex.h5ad')
 
     sc.pp.normalize_total(adata)
     sc.pp.log1p(adata)
