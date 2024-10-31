@@ -7,6 +7,8 @@ This repository hosts the official implementation of PRnet, a flexible and scala
 ## Download model and datasets
 We provide [model pretrained weight](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/PRnet_model.zip) and precessed dataset ([LINCS_L1000](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Lincs_L1000.h5ad) and [Sci-Plex](http://prnet.drai.cn:9003/tcm/download/?file_path=/mnt/data/PRnetWeb/Sci_Plex.h5ad)) for training and reproducibility.
 
+If the links above fail to redirect, please download the corresponding data and pretrained model weights from: [http://prnet.drai.cn/Statistics/](http://prnet.drai.cn/Statistics/). For the data files, download `LINCS L1000 Chemical Perturbations` and `Sci-plex Chemical Perturbations` from the `Supplementary Dataset` section. For the model weights, download the `PRnet model` from the `Supplementary Dataset` section.
+
 To clone our model, install github and run:
 ```
 git clone https://github.com/Perturbation-Response-Prediction/PRnet.git
