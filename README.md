@@ -56,15 +56,15 @@ After the docker container is started, you can exit using `exit`. If you use the
 Create result folders:
 ```
 mkdir results
-mkdir /results/lincs
-mkdir /results/sciplex
-mkdir /results/demo
+mkdir results/lincs
+mkdir results/sciplex
+mkdir results/demo
 ```
 
 Inference with demo dataset:
 ```
-python test_demo.py --split_key demo_split
-                    --data_path ./dataset/demo.h5ad
+python test_demo.py --split_key demo_split \
+                    --data_path ./datasets/demo.h5ad \
                     --results_dir  ./results/demo/
 ```
 ## Step 3: Inference with custom datatset
